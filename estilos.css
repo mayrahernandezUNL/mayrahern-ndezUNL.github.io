@@ -1,0 +1,693 @@
+/* =====================================================================
+   TOKENS DE DISEÑO — Identidad Cuentos de Nuestra Comunidad
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --marino:      #067928;
+  --marino-med:  #0a2d8f;
+  --marino-suave:#EEF2F7;
+  --oro:         #C9922A;
+  --oro-claro:   #F0D9A8;
+  --oro-suave:   #FBF5E8;
+  --pizarra:     #4A5568;
+  --selva:       #2D6A4F;
+  --selva-suave: #E8F4EE;
+  --crema:       #F8F6F1;
+  --blanco:      #FFFFFF;
+  --texto:       #1A1A2E;
+  --texto-med:   #3D3D5C;
+  --linea:       rgba(201,146,42,0.25);
+  --linea-gris:  rgba(0,0,0,0.09);
+
+  --serif-display: 'Playfair Display', Georgia, serif;
+  --serif-body:    'Source Serif 4', Georgia, serif;
+  --sans:          'DM Sans', system-ui, sans-serif;
+}
+
+/* =====================================================================
+   RESET Y BASE
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--serif-body);
+  background-color: var(--crema);
+  color: var(--texto);
+  overflow-x: hidden;
+  padding: 0 18px 18px;
+  line-height: 1.75;
+}
+
+h1, h2, h3 {
+  font-family: var(--serif-display);
+  color: var(--marino);
+  text-align: left;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+p {
+  font-family: var(--serif-body);
+  color: var(--texto-med);
+  line-height: 1.85;
+  text-align: left;
+  font-size: 1rem;
+}
+
+hr { display: none; }
+
+.seccion {
+  display: none;
+  padding: 40px 0 60px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* =====================================================================
+   HEADER — Portada de libro académico
+   ===================================================================== */
+.header-info {
+  background-color: var(--marino);
+  border-radius: 0 0 4px 4px;
+  margin: 0 -18px 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-info::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--oro);
+}
+
+.contenedor-logos {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: stretch;
+  min-height: 120px;
+}
+
+.bloque-izquierdo-agrupado,
+.bloque-derecho-agrupado {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 28px;
+}
+
+.bloque-izquierdo-agrupado {
+  border-right: 1px solid rgba(201,146,42,0.35);
+}
+.bloque-derecho-agrupado {
+  border-left: 1px solid rgba(201,146,42,0.35);
+}
+
+.logo-izquierdo {
+  height: 120px;
+  width: auto;
+}
+.logo-derecho {
+  height: 105px;
+  width: auto;
+}
+
+.texto-unl, .texto-colegio {
+  color: var(--oro-claro);
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  letter-spacing: 0.4px;
+}
+.texto-colegio { text-align: right; }
+
+.texto-informatica {
+  text-align: center;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.texto-informatica h1 {
+  font-family: var(--serif-display);
+  font-weight: 900;
+  font-size: clamp(1.05rem, 2.8vw, 1.8rem);
+  color: #FFFFFF;
+  text-align: center;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.texto-informatica h2 {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(0.58rem, 1.4vw, 0.75rem);
+  color: var(--oro-claro);
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Línea de separación dorada decorativa */
+.texto-informatica::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: var(--oro);
+  margin-top: 12px;
+}
+
+/* =====================================================================
+   MENÚ — Línea académica
+   ===================================================================== */
+.menu {
+  background-color: var(--blanco);
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 24px;
+  align-items: stretch;
+  gap: 0;
+  border-bottom: 2px solid var(--linea-gris);
+  font-family: var(--sans);
+  justify-content: center;
+  margin: 0 -18px 40px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(13,31,60,0.07);
+}
+
+.menu a {
+  color: var(--pizarra);
+  padding: 16px 20px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.83rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.menu a i { font-size: 0.85rem; opacity: 0.7; }
+
+.menu a:hover,
+.menu a:active {
+  color: var(--marino);
+  border-bottom-color: var(--oro);
+}
+
+/* =====================================================================
+   EYEBROW / ETIQUETA DE SECCIÓN
+   ===================================================================== */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--oro);
+  margin-bottom: 16px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--oro);
+  display: inline-block;
+}
+
+/* =====================================================================
+   PRIMERAPARTE — Apertura de sección
+   ===================================================================== */
+.primeraparte {
+  text-align: center;
+  padding: 0 0 36px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--linea-gris);
+  margin-bottom: 40px;
+}
+
+.primeraparte h1 {
+  font-family: var(--serif-display);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  color: var(--marino);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.primeraparte p {
+  font-size: 1.05rem;
+  color: var(--pizarra);
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+  font-style: italic;
+}
+
+/* =====================================================================
+   BLOQUES FOTO + TEXTO
+   ===================================================================== */
+.bloque {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--linea-gris);
+}
+
+.bloque:last-of-type { border-bottom: none; }
+
+
+
+.bloque .texto h1 {
+  font-family: var(--serif-display);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--marino);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--oro);
+  display: inline-block;
+  text-align: left;
+}
+
+.bloque .texto p {
+  text-align: left;
+  font-size: 0.97rem;
+  line-height: 1.9;
+}
+
+.bloque .imagen-principal,
+.bloque video.imagen-principal {
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+  display: block;
+  border: 1px solid var(--linea-gris);
+}
+
+.imagen-principal {
+  display: block;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  border-radius: 2px;
+  border: 1px solid var(--linea-gris);
+}
+
+/* =====================================================================
+   AUDIO PLAYER
+   ===================================================================== */
+.audio-player {
+  max-width: 520px;
+  background: var(--marino-suave);
+  padding: 18px 22px;
+  border-radius: 2px;
+  border-left: 3px solid var(--oro);
+  margin: 0 auto 48px;
+  width: 100%;
+}
+
+.audio-player audio {
+  width: 100%;
+  height: 40px;
+  outline: none;
+}
+
+/* =====================================================================
+   VISOR CALAMEO / HEYZINE
+   ===================================================================== */
+.calameo-visor {
+  width: 100%;
+  height: 500px;
+  border: none;
+  display: block;
+}
+
+/* =====================================================================
+   BOTONES
+   ===================================================================== */
+.btn-cuento,
+.btn-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  background-color: var(--marino);
+  color: #FFFFFF;
+  padding: 10px 24px;
+  border-radius: 1px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 0.2s ease, transform 0.15s ease;
+  position: relative;
+}
+
+.btn-cuento::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--oro);
+  transition: width 0.3s ease;
+}
+
+.btn-cuento:hover::after { width: 100%; }
+.btn-cuento:hover, .btn-volver:hover { background-color: var(--marino-med); }
+.btn-volver { background-color: transparent; color: var(--marino); border: 1px solid var(--marino); margin-bottom: 24px; }
+.btn-volver:hover { background-color: var(--marino); color: #fff; }
+
+.btn-volver-juego {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: transparent;
+  color: var(--marino);
+  border: 1px solid var(--marino);
+  padding: 10px 22px;
+  border-radius: 1px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: var(--sans);
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-volver-juego:hover { background: var(--marino); color: #fff; }
+
+/* =====================================================================
+   BIBLIOTECA — Layout con numeración romana
+   ===================================================================== */
+.biblioteca-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0;
+}
+
+.tarjeta-cuento {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 28px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--linea-gris);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  position: relative;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.tarjeta-cuento:first-child { border-top: 1px solid var(--linea-gris); }
+
+.tarjeta-cuento:hover {
+  background: var(--blanco);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Número romano lateral */
+.tarjeta-cuento .numero-romano {
+  font-family: var(--serif-display);
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--oro);
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tarjeta-info {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.tarjeta-info .etiqueta-region {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--selva);
+  margin-bottom: 2px;
+}
+
+.tarjeta-info h2 {
+  font-family: var(--serif-display);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: var(--marino);
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.tarjeta-info p {
+  font-size: 0.88rem;
+  color: var(--pizarra);
+  text-align: left;
+  font-style: italic;
+}
+
+.miniatura-cuento {
+  width: 160px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 1px;
+  border: 1px solid var(--linea-gris);
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Remover pseudoelementos decorativos genéricos */
+.tarjeta-cuento::before,
+.tarjeta-cuento::after { display: none; content: none; }
+
+/* Columna principal (cuento destacado) — sin cambio de layout, solo borde izq dorado */
+.columna-principal .tarjeta-cuento {
+  border: none;
+  border-left: 3px solid var(--oro);
+  padding-left: 20px;
+}
+
+/* Quitar wrappers de columna — todos los cuentos van en flujo vertical */
+.columna-principal,
+.cuento-1,
+.cuento-2,
+.cuento-3 {
+  display: contents;
+}
+
+/* =====================================================================
+   MENÚ JUEGOS — Lista académica similar a biblioteca
+   ===================================================================== */
+.contenedor-cuentos {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.contenedor-cuentos .tarjeta-cuento.tarjeta-principal {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--linea-gris);
+  background: transparent;
+  width: 100%;
+}
+
+.contenedor-cuentos .tarjeta-cuento:first-child { border-top: 1px solid var(--linea-gris); }
+.contenedor-cuentos .tarjeta-cuento:nth-child(5) { grid-column: unset; }
+
+/* =====================================================================
+   IFRAME JUEGO
+   ===================================================================== */
+#zona-juego iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+  margin-top: 12px;
+  display: block;
+}
+
+/* =====================================================================
+   FOOTER
+   ===================================================================== */
+footer {
+  background-color: var(--marino) !important;
+  border-radius: 0 !important;
+  color: var(--oro-claro) !important;
+  padding: 32px 24px !important;
+  font-family: var(--sans) !important;
+  margin: 40px -18px 0 !important;
+  text-align: center;
+  border-top: 3px solid var(--oro) !important;
+}
+
+footer img { max-width: 90px !important; height: auto; filter: brightness(0) invert(1); opacity: 0.85; }
+footer div { font-size: clamp(11px, 2.2vw, 13px) !important; }
+footer a { color: var(--oro-claro) !important; text-decoration: underline; }
+footer strong { color: #FFFFFF; }
+
+/* =====================================================================
+   RESPONSIVE — TABLET
+   ===================================================================== */
+@media (max-width: 860px) {
+  .bloque { grid-template-columns: 1fr; gap: 24px; }
+  .bloque .texto h1 { font-size: 1.2rem; }
+}
+
+/* =====================================================================
+   RESPONSIVE — MÓVIL
+   ===================================================================== */
+@media (max-width: 640px) {
+  body { padding: 0 10px 10px; }
+
+  .contenedor-logos {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .bloque-izquierdo-agrupado,
+  .bloque-derecho-agrupado {
+    display: none;
+  }
+
+  .texto-informatica {
+    padding: 20px 16px 24px;
+  }
+
+  .texto-informatica h1 { font-size: clamp(0.95rem, 5vw, 1.3rem); }
+
+  .menu { padding: 0 8px; margin: 0 -10px 28px; }
+  .menu a { padding: 12px 10px; font-size: 0.72rem; gap: 5px; letter-spacing: 0.4px; }
+  .menu a i { display: none; }
+
+  .tarjeta-cuento {
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+  }
+  .miniatura-cuento { display: none; }
+  .tarjeta-info h2 { font-size: 1rem; }
+
+  .contenedor-cuentos .tarjeta-cuento.tarjeta-principal {
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+  }
+  .contenedor-cuentos .tarjeta-cuento.tarjeta-principal .miniatura-cuento { display: none; }
+
+  .calameo-visor { height: 320px; }
+  #zona-juego iframe { height: 72vh; }
+
+  footer { margin: 32px -10px 0 !important; padding: 24px 16px !important; }
+}
+
+@media (max-width: 400px) {
+  .texto-informatica h1 { font-size: 0.9rem; }
+  .menu a { font-size: 0.68rem; padding: 10px 7px; }
+}
+
+/* =====================================================================
+   ACCESIBILIDAD — Reduced motion
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* =====================================================================
+   CLASES DE UTILIDAD
+   ===================================================================== */
+.texto-centro { text-align: center !important; }
+.mb-0 { margin-bottom: 0 !important; }
+
+/* Panel de puntos (juegos) */
+#panel-puntos {
+  background: var(--blanco);
+  border: 1px solid var(--linea-gris);
+  border-left: 3px solid var(--oro);
+  padding: 20px;
+  margin: 24px 0;
+}
+
+/* Badges */
+.badge-alerta {
+  display: inline-block;
+  background: #C0392B;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 1px;
+  margin-left: 6px;
+  font-family: var(--sans);
+  letter-spacing: 0.5px;
+}
+
+/* Buscador (si se usa) */
+.resultados-busqueda {
+  position: absolute;
+  top: 110%; left: 0;
+  width: 260px;
+  background: white;
+  border: 1px solid var(--linea-gris);
+  z-index: 9999;
+  display: none;
+}
+
+.resultado-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--texto);
+  border-bottom: 1px solid var(--linea-gris);
+  font-family: var(--sans);
+}
+
+.resultado-item:hover { background: var(--crema); }
+.resultado-item i { color: var(--selva); }

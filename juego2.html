@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los secretos del río — Juego de memoria</title>
+<style>
+  :root{
+    --cacao:#2D1B12;
+    --cacao-2:#4A2E1C;
+    --arena:#F5E6C8;
+    --arena-2:#EBD9AE;
+    --rio:#1B6B5C;
+    --rio-2:#0F4A3F;
+    --terracota:#C97B3D;
+    --dorado:#E8A23D;
+    --tinta:#2A2017;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(232,162,61,0.25), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(27,107,92,0.25), transparent 45%),
+      var(--arena);
+    font-family:'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    color:var(--tinta);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 16px 60px;
+  }
+
+  .titulo-wrap{
+    text-align:center;
+    max-width:640px;
+    margin-bottom:6px;
+  }
+
+  h1{
+    font-family:'Papyrus', 'Marker Felt', 'Segoe Print', cursive;
+    font-size:clamp(28px,5.5vw,46px);
+    color:var(--cacao);
+    margin:0 0 4px;
+    letter-spacing:0.5px;
+    text-shadow: 1px 1px 0 rgba(232,162,61,0.4);
+  }
+
+  .subtitulo{
+    font-size:15px;
+    color:var(--rio-2);
+    font-style:italic;
+    margin:0 0 18px;
+    opacity:0.85;
+  }
+
+  .panel-info{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+
+  .pastilla{
+    background:var(--cacao);
+    color:var(--arena);
+    padding:8px 18px;
+    border-radius:999px;
+    font-size:14px;
+    letter-spacing:0.5px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    box-shadow:0 3px 0 rgba(0,0,0,0.15);
+  }
+
+  .pastilla strong{ color:var(--dorado); font-size:16px; }
+
+  button#reiniciar{
+    background:var(--terracota);
+    color:#fff;
+    border:none;
+    padding:9px 20px;
+    border-radius:999px;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+    box-shadow:0 3px 0 rgba(0,0,0,0.2);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  button#reiniciar:hover{ transform:translateY(-1px); }
+  button#reiniciar:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,0.2); }
+  button#reiniciar:focus-visible{ outline:3px solid var(--rio); outline-offset:2px; }
+
+  .tablero{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:14px;
+    max-width:560px;
+    width:100%;
+  }
+
+  .carta{
+    aspect-ratio:1/1;
+    perspective:800px;
+    cursor:pointer;
+  }
+
+  .carta-interior{
+    position:relative;
+    width:100%;
+    height:100%;
+    transition:transform .5s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d;
+  }
+
+  .carta.volteada .carta-interior,
+  .carta.encontrada .carta-interior{
+    transform:rotateY(180deg);
+  }
+
+  .cara{
+    position:absolute;
+    inset:0;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    backface-visibility:hidden;
+  }
+
+  .cara-dorso{
+    background:
+      radial-gradient(circle at 30% 30%, var(--cacao-2), var(--cacao) 70%);
+    border:2px solid var(--terracota);
+    box-shadow: inset 0 0 0 4px rgba(232,162,61,0.18), 0 3px 0 rgba(0,0,0,0.2);
+  }
+
+  .cara-dorso::after{
+    content:"🌱";
+    font-size:clamp(20px,5vw,30px);
+    opacity:0.75;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+  }
+
+  .cara-frente{
+    background:linear-gradient(135deg, var(--arena-2), #fff);
+    border:2px solid var(--rio);
+    transform:rotateY(180deg);
+    font-size:clamp(28px,7vw,42px);
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .cara-frente span.emoji{ line-height:1; }
+  .cara-frente span.etiqueta{
+    font-size:10px;
+    color:var(--rio-2);
+    font-family:Georgia, serif;
+    letter-spacing:0.3px;
+  }
+
+  .carta.encontrada .cara-frente{
+    background:linear-gradient(135deg, #d7ecd8, #fff);
+    border-color:var(--dorado);
+    animation: brillito .6s ease;
+  }
+
+  @keyframes brillito{
+    0%{ box-shadow:0 0 0 0 rgba(232,162,61,0.6); }
+    100%{ box-shadow:0 0 0 10px rgba(232,162,61,0); }
+  }
+
+  .carta:not(.volteada):not(.encontrada):hover .carta-interior{
+    transform: translateY(-3px) rotateZ(-1deg);
+  }
+
+  .mensaje-final{
+    display:none;
+    max-width:520px;
+    text-align:center;
+    margin-top:26px;
+    background:#fff;
+    border:2px solid var(--rio);
+    border-radius:16px;
+    padding:22px 24px;
+    box-shadow:0 6px 0 rgba(0,0,0,0.08);
+  }
+
+  .mensaje-final.visible{ display:block; animation: aparecer .5s ease; }
+
+  @keyframes aparecer{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .mensaje-final h2{
+    font-family:'Papyrus','Segoe Print',cursive;
+    color:var(--rio-2);
+    margin:0 0 8px;
+    font-size:22px;
+  }
+
+  .mensaje-final p{
+    margin:0;
+    font-size:15px;
+    line-height:1.5;
+    color:var(--tinta);
+  }
+
+  footer{
+    margin-top:30px;
+    font-size:12px;
+    color:var(--cacao-2);
+    opacity:0.7;
+    text-align:center;
+  }
+
+  @media (max-width:380px){
+    .tablero{ grid-template-columns:repeat(3,1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .carta-interior, .carta:hover .carta-interior{ transition:none; }
+    .mensaje-final.visible{ animation:none; }
+    .carta.encontrada .cara-frente{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="titulo-wrap">
+    <h1>🌿 Los secretos del río 🌿</h1>
+    <p class="subtitulo">Encuentra los pares y ayuda a sanar el bosque de Ana Lucía</p>
+  </div>
+
+  <div class="panel-info">
+    <div class="pastilla">Movimientos: <strong id="contador-movimientos">0</strong></div>
+    <div class="pastilla">Pares: <strong id="contador-pares">0</strong> / 8</div>
+    <button id="reiniciar" type="button">Reiniciar</button>
+  </div>
+
+  <div class="tablero" id="tablero" role="grid" aria-label="Tablero de memoria"></div>
+
+  <div class="mensaje-final" id="mensajeFinal">
+    <h2>El río vuelve a hablar 🌊</h2>
+    <p>Has encontrado todos los pares. Como Ana Lucía, escuchaste con paciencia y ayudaste a que la vida regresara al cantón Arenillas. El agua corre clara otra vez.</p>
+  </div>
+
+  <footer>Inspirado en la leyenda "La niña del cacao" — cantón Arenillas, El Oro, Ecuador</footer>
+
+<script>
+  const elementos = [
+    { emoji: "🍫", etiqueta: "Cacao" },
+    { emoji: "🌊", etiqueta: "El río" },
+    { emoji: "🐟", etiqueta: "Los peces" },
+    { emoji: "⛰️", etiqueta: "Cerro El Tigre" },
+    { emoji: "🦜", etiqueta: "Loros" },
+    { emoji: "🌳", etiqueta: "Guayacán" },
+    { emoji: "💎", etiqueta: "Piedra antigua" },
+    { emoji: "🌙", etiqueta: "Noche estrellada" },
+  ];
+
+  let primeraCarta = null;
+  let segundaCarta = null;
+  let bloqueoTablero = false;
+  let movimientos = 0;
+  let paresEncontrados = 0;
+
+  const tablero = document.getElementById("tablero");
+  const contadorMovimientos = document.getElementById("contador-movimientos");
+  const contadorPares = document.getElementById("contador-pares");
+  const mensajeFinal = document.getElementById("mensajeFinal");
+
+  function barajar(array){
+    const copia = [...array];
+    for(let i = copia.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+  }
+
+  function crearTablero(){
+    tablero.innerHTML = "";
+    movimientos = 0;
+    paresEncontrados = 0;
+    primeraCarta = null;
+    segundaCarta = null;
+    bloqueoTablero = false;
+    contadorMovimientos.textContent = "0";
+    contadorPares.textContent = "0";
+    mensajeFinal.classList.remove("visible");
+
+    const mazo = barajar([...elementos, ...elementos]);
+
+    mazo.forEach((item, indice) => {
+      const carta = document.createElement("div");
+      carta.className = "carta";
+      carta.dataset.valor = item.etiqueta;
+      carta.setAttribute("role", "button");
+      carta.setAttribute("tabindex", "0");
+      carta.setAttribute("aria-label", "Carta boca abajo");
+
+      carta.innerHTML = `
+        <div class="carta-interior">
+          <div class="cara cara-dorso"></div>
+          <div class="cara cara-frente">
+            <span class="emoji">${item.emoji}</span>
+            <span class="etiqueta">${item.etiqueta}</span>
+          </div>
+        </div>
+      `;
+
+      carta.addEventListener("click", () => manejarClicCarta(carta));
+      carta.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          manejarClicCarta(carta);
+        }
+      });
+
+      tablero.appendChild(carta);
+    });
+  }
+
+  function manejarClicCarta(carta){
+    if(bloqueoTablero) return;
+    if(carta.classList.contains("volteada") || carta.classList.contains("encontrada")) return;
+
+    carta.classList.add("volteada");
+    carta.setAttribute("aria-label", "Carta: " + carta.dataset.valor);
+
+    if(!primeraCarta){
+      primeraCarta = carta;
+      return;
+    }
+
+    segundaCarta = carta;
+    bloqueoTablero = true;
+    movimientos++;
+    contadorMovimientos.textContent = movimientos;
+
+    if(primeraCarta.dataset.valor === segundaCarta.dataset.valor){
+      primeraCarta.classList.add("encontrada");
+      segundaCarta.classList.add("encontrada");
+      paresEncontrados++;
+      contadorPares.textContent = paresEncontrados;
+      reiniciarSeleccion();
+
+      if(paresEncontrados === elementos.length){
+        setTimeout(() => {
+          mensajeFinal.classList.add("visible");
+          mensajeFinal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 500);
+      }
+    } else {
+      setTimeout(() => {
+        primeraCarta.classList.remove("volteada");
+        segundaCarta.classList.remove("volteada");
+        primeraCarta.setAttribute("aria-label", "Carta boca abajo");
+        segundaCarta.setAttribute("aria-label", "Carta boca abajo");
+        reiniciarSeleccion();
+      }, 900);
+    }
+  }
+
+  function reiniciarSeleccion(){
+    primeraCarta = null;
+    segundaCarta = null;
+    bloqueoTablero = false;
+  }
+
+  document.getElementById("reiniciar").addEventListener("click", crearTablero);
+
+  crearTablero();
+</script>
+
+</body>
+</html>

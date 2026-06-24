@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los Gagones - Une a los personajes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #1a1220;
+    min-height: 100vh;
+    padding: 14px;
+    background-image: radial-gradient(ellipse at 20% 50%, #2a1a35 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, #1a2a1a 0%, transparent 50%);
+  }
+
+  h1 {
+    text-align: center;
+    color: #f5c842;
+    font-size: clamp(18px, 4vw, 26px);
+    margin-bottom: 4px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 1px;
+  }
+
+  .subtitulo {
+    text-align: center;
+    color: #c8a8d8;
+    font-size: clamp(11px, 2.2vw, 14px);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .progreso-wrap {
+    max-width: 520px;
+    margin: 0 auto 14px;
+  }
+
+  .progreso-label {
+    display: flex;
+    justify-content: space-between;
+    color: #c8a8d8;
+    font-size: 12px;
+    margin-bottom: 4px;
+    font-family: Arial, sans-serif;
+  }
+
+  .progreso-bar {
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .progreso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f5c842, #e8890c);
+    border-radius: 20px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .arena {
+    max-width: 700px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* COLUMNA IZQUIERDA - personajes para arrastrar */
+  .col-titulo {
+    text-align: center;
+    color: #f5c842;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .personaje {
+    background: linear-gradient(135deg, #2d1a45, #3a2255);
+    border: 2px solid #6a3a9a;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .personaje:hover {
+    transform: scale(1.04) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106,58,154,0.5);
+    border-color: #f5c842;
+  }
+
+  .personaje.arrastrando {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+
+  .personaje.colocado {
+    opacity: 0.3;
+    pointer-events: none;
+    border-color: #444;
+    filter: grayscale(0.6);
+  }
+
+  .per-emoji { font-size: clamp(24px, 5vw, 32px); flex-shrink: 0; }
+
+  .per-nombre {
+    font-family: Georgia, serif;
+    font-size: clamp(12px, 2.5vw, 15px);
+    color: #fff8dc;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  /* COLUMNA DERECHA - zonas drop */
+  .zona-drop {
+    background: rgba(255,255,255,0.04);
+    border: 2.5px dashed rgba(245,200,66,0.3);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+    min-height: 80px;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .zona-drop.sobre {
+    border-color: #f5c842;
+    background: rgba(245,200,66,0.08);
+  }
+
+  .zona-drop.correcto {
+    border-color: #64dc82;
+    border-style: solid;
+    background: rgba(100,220,130,0.08);
+  }
+
+  .zona-drop.incorrecto {
+    border-color: #dc5050;
+    border-style: solid;
+    background: rgba(220,80,80,0.1);
+    animation: sacudir 0.4s;
+  }
+
+  @keyframes sacudir {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+  }
+
+  .descripcion-texto {
+    color: #d4b8e8;
+    font-size: clamp(11px, 2vw, 13px);
+    line-height: 1.5;
+    font-family: Arial, sans-serif;
+    margin-bottom: 8px;
+  }
+
+  .drop-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(245,200,66,0.5);
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .drop-placeholder span { font-size: 18px; }
+
+  .respuesta-colocada {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-top: 6px;
+  }
+
+  .respuesta-colocada .per-emoji { font-size: 20px; }
+  .respuesta-colocada .per-nombre { font-size: 12px; color: #fff8dc; }
+
+  /* FEEDBACK */
+  .feedback-barra {
+    max-width: 700px;
+    margin: 12px auto 0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: clamp(12px, 2.5vw, 15px);
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    min-height: 40px;
+    transition: all 0.3s;
+    color: transparent;
+  }
+
+  .feedback-barra.ok {
+    background: rgba(100,220,130,0.15);
+    color: #ccffdd;
+    border: 1.5px solid rgba(100,220,130,0.4);
+  }
+
+  .feedback-barra.mal {
+    background: rgba(220,80,80,0.15);
+    color: #ffcccc;
+    border: 1.5px solid rgba(220,80,80,0.3);
+  }
+
+  /* OVERLAY FINAL */
+  .fin-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .fin-overlay.show { display: flex; }
+
+  .fin-box {
+    background: linear-gradient(135deg, #2d1a45, #1a2a1a);
+    border: 3px solid #f5c842;
+    border-radius: 20px;
+    padding: 30px 36px;
+    text-align: center;
+    max-width: 340px;
+    box-shadow: 0 0 40px rgba(245,200,66,0.3);
+  }
+
+  .fin-box .trofeo { font-size: 70px; display: block; margin-bottom: 10px; }
+  .fin-box h2 { font-size: 24px; color: #f5c842; margin-bottom: 10px; }
+  .fin-box p { color: #d4b8e8; font-size: 14px; line-height: 1.6; margin-bottom: 18px; font-family: Arial, sans-serif; }
+
+  .fin-btn {
+    background: #f5c842;
+    color: #1a1220;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    transition: transform 0.1s;
+  }
+
+  .fin-btn:hover { transform: scale(1.05); }
+
+  /* FANTASMAS flotantes de fondo */
+  .fantasma {
+    position: fixed;
+    font-size: 28px;
+    opacity: 0.07;
+    animation: flotar 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes flotar {
+    0%,100% { transform: translateY(0px) rotate(-5deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+  }
+
+  .puntos-hud {
+    text-align: center;
+    color: #f5c842;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: Arial, sans-serif;
+  }
+
+  @media (max-width: 520px) {
+    .arena { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Fantasmas decorativos -->
+<div class="fantasma" style="top:10%; left:5%; animation-delay:0s;">🐱</div>
+<div class="fantasma" style="top:60%; right:4%; animation-delay:2s;">🌙</div>
+<div class="fantasma" style="top:30%; right:8%; animation-delay:4s;">🐱</div>
+<div class="fantasma" style="bottom:15%; left:3%; animation-delay:1s;">⭐</div>
+
+<h1>🐱 Los Gagones 🐱</h1>
+<p class="subtitulo">Arrastra cada personaje hacia su descripción correcta</p>
+
+<div class="puntos-hud">⭐ Puntos: <span id="pts">0</span></div>
+
+<div class="progreso-wrap">
+  <div class="progreso-label">
+    <span>Progreso</span>
+    <span id="prog-txt">0 / 5</span>
+  </div>
+  <div class="progreso-bar"><div class="progreso-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="arena">
+
+  <!-- COLUMNA IZQUIERDA -->
+  <div id="col-personajes">
+    <div class="col-titulo">👆 Personajes</div>
+
+    <div class="personaje" id="p-gagones" draggable="true" data-id="gagones"
+         ontouchstart="iniciarTouch(event,this)" ontouchmove="moverTouch(event)" ontouchend="soltarTouch(event)">
+      <span class="per-emoji">🐱</span>
+      <span class="per-nombre">Los Gagones</span>
+    </div>
+
+    <div class="personaje" id="p-josue" draggable="true" data-id="josue"
+         ontouchstart="iniciarTouch(event,this)" ontouchmove="moverTouch(event)" ontouchend="soltarTouch(event)">
+      <span class="per-emoji">👦</span>
+      <span class="per-nombre">Josué</span>
+    </div>
+
+    <div class="personaje" id="p-alisson" draggable="true" data-id="alisson"
+         ontouchstart="iniciarTouch(event,this)" ontouchmove="moverTouch(event)" ontouchend="soltarTouch(event)">
+      <span class="per-emoji">👧</span>
+      <span class="per-nombre">Alisson</span>
+    </div>
+
+    <div class="personaje" id="p-sacerdote" draggable="true" data-id="sacerdote"
+         ontouchstart="iniciarTouch(event,this)" ontouchmove="moverTouch(event)" ontouchend="soltarTouch(event)">
+      <span class="per-emoji">⛪</span>
+      <span class="per-nombre">El Sacerdote</span>
+    </div>
+
+    <div class="personaje" id="p-vecinos" draggable="true" data-id="vecinos"
+         ontouchstart="iniciarTouch(event,this)" ontouchmove="moverTouch(event)" ontouchend="soltarTouch(event)">
+      <span class="per-emoji">👥</span>
+      <span class="per-nombre">Los Vecinos</span>
+    </div>
+  </div>
+
+  <!-- COLUMNA DERECHA -->
+  <div id="col-descripciones">
+    <div class="col-titulo">📖 Descripciones</div>
+
+    <div class="zona-drop" data-acepta="gagones"
+         ondragover="event.preventDefault(); this.classList.add('sobre')"
+         ondragleave="this.classList.remove('sobre')"
+         ondrop="soltar(event, this)">
+      <p class="descripcion-texto">🌙 Criaturas misteriosas parecidas a los gatos que salen de noche después del toque de campanas. ¡Nadie los ha visto pero todos los temen!</p>
+      <div class="drop-placeholder"><span>👆</span> Arrastra aquí al personaje</div>
+      <div class="respuesta-colocada" id="resp-gagones"></div>
+    </div>
+
+    <div class="zona-drop" data-acepta="josue"
+         ondragover="event.preventDefault(); this.classList.add('sobre')"
+         ondragleave="this.classList.remove('sobre')"
+         ondrop="soltar(event, this)">
+      <p class="descripcion-texto">🏠 Joven de San Jacinto que decidió mudarse con su pareja sin casarse por la iglesia, desafiando las advertencias del pueblo.</p>
+      <div class="drop-placeholder"><span>👆</span> Arrastra aquí al personaje</div>
+      <div class="respuesta-colocada" id="resp-josue"></div>
+    </div>
+
+    <div class="zona-drop" data-acepta="alisson"
+         ondragover="event.preventDefault(); this.classList.add('sobre')"
+         ondragleave="this.classList.remove('sobre')"
+         ondrop="soltar(event, this)">
+      <p class="descripcion-texto">💛 La pareja de Josué que también desafió las advertencias del pueblo. Juntos vivieron en el sitio "Las Antenas".</p>
+      <div class="drop-placeholder"><span>👆</span> Arrastra aquí al personaje</div>
+      <div class="respuesta-colocada" id="resp-alisson"></div>
+    </div>
+
+    <div class="zona-drop" data-acepta="sacerdote"
+         ondragover="event.preventDefault(); this.classList.add('sobre')"
+         ondragleave="this.classList.remove('sobre')"
+         ondrop="soltar(event, this)">
+      <p class="descripcion-texto">✝️ Representa la voz moral de la comunidad y recuerda a todos la importancia del matrimonio por la iglesia.</p>
+      <div class="drop-placeholder"><span>👆</span> Arrastra aquí al personaje</div>
+      <div class="respuesta-colocada" id="resp-sacerdote"></div>
+    </div>
+
+    <div class="zona-drop" data-acepta="vecinos"
+         ondragover="event.preventDefault(); this.classList.add('sobre')"
+         ondragleave="this.classList.remove('sobre')"
+         ondrop="soltar(event, this)">
+      <p class="descripcion-texto">🏘️ Personas del pueblo que transmiten advertencias a los jóvenes. Ellos encontraron a Josué y Alisson pálidos y sin poder caminar.</p>
+      <div class="drop-placeholder"><span>👆</span> Arrastra aquí al personaje</div>
+      <div class="respuesta-colocada" id="resp-vecinos"></div>
+    </div>
+  </div>
+</div>
+
+<div class="feedback-barra" id="feedback"></div>
+
+<!-- FIN -->
+<div class="fin-overlay" id="fin">
+  <div class="fin-box">
+    <span class="trofeo">🏆</span>
+    <h2>¡Eres un experto!</h2>
+    <p id="fin-msg"></p>
+    <button class="fin-btn" onclick="reiniciar()">¡Jugar de nuevo!</button>
+  </div>
+</div>
+
+<script>
+var arrastrandoId = null;
+var arrastrandoEl = null;
+var correctos = 0;
+var puntos = 0;
+var total = 5;
+
+var DATOS = {
+  gagones:   { emoji: '🐱', nombre: 'Los Gagones' },
+  josue:     { emoji: '👦', nombre: 'Josué' },
+  alisson:   { emoji: '👧', nombre: 'Alisson' },
+  sacerdote: { emoji: '⛪', nombre: 'El Sacerdote' },
+  vecinos:   { emoji: '👥', nombre: 'Los Vecinos' },
+};
+
+// ── DRAG & DROP escritorio ──
+document.querySelectorAll('.personaje').forEach(function(el) {
+  el.addEventListener('dragstart', function(e) {
+    arrastrandoId = this.dataset.id;
+    arrastrandoEl = this;
+    setTimeout(() => this.classList.add('arrastrando'), 0);
+  });
+  el.addEventListener('dragend', function() {
+    this.classList.remove('arrastrando');
+  });
+});
+
+function soltar(e, zona) {
+  e.preventDefault();
+  zona.classList.remove('sobre');
+  if (!arrastrandoId) return;
+  verificar(arrastrandoId, arrastrandoEl, zona);
+}
+
+// ── TOUCH (móvil) ──
+var touchEl = null;
+var ghostEl = null;
+var offsetX = 0, offsetY = 0;
+
+function iniciarTouch(e, el) {
+  if (el.classList.contains('colocado')) return;
+  touchEl = el;
+  arrastrandoId = el.dataset.id;
+  arrastrandoEl = el;
+  var t = e.touches[0];
+  var rect = el.getBoundingClientRect();
+  offsetX = t.clientX - rect.left;
+  offsetY = t.clientY - rect.top;
+
+  ghostEl = el.cloneNode(true);
+  ghostEl.style.cssText = 'position:fixed; pointer-events:none; z-index:9999; opacity:0.85; transition:none; width:' + rect.width + 'px;';
+  ghostEl.style.left = (t.clientX - offsetX) + 'px';
+  ghostEl.style.top  = (t.clientY - offsetY) + 'px';
+  document.body.appendChild(ghostEl);
+  el.classList.add('arrastrando');
+  e.preventDefault();
+}
+
+function moverTouch(e) {
+  if (!ghostEl) return;
+  var t = e.touches[0];
+  ghostEl.style.left = (t.clientX - offsetX) + 'px';
+  ghostEl.style.top  = (t.clientY - offsetY) + 'px';
+
+  document.querySelectorAll('.zona-drop').forEach(function(z) {
+    var r = z.getBoundingClientRect();
+    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+      z.classList.add('sobre');
+    } else {
+      z.classList.remove('sobre');
+    }
+  });
+  e.preventDefault();
+}
+
+function soltarTouch(e) {
+  if (!ghostEl) return;
+  var t = e.changedTouches[0];
+  document.body.removeChild(ghostEl);
+  ghostEl = null;
+  if (touchEl) touchEl.classList.remove('arrastrando');
+
+  var zonaDestino = null;
+  document.querySelectorAll('.zona-drop').forEach(function(z) {
+    z.classList.remove('sobre');
+    var r = z.getBoundingClientRect();
+    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+      zonaDestino = z;
+    }
+  });
+
+  if (zonaDestino) {
+    verificar(arrastrandoId, arrastrandoEl, zonaDestino);
+  }
+  touchEl = null;
+  arrastrandoId = null;
+  arrastrandoEl = null;
+}
+
+// ── VERIFICACIÓN ──
+function verificar(id, elPersonaje, zona) {
+  var acepta = zona.dataset.acepta;
+  var fb = document.getElementById('feedback');
+
+  if (zona.classList.contains('correcto')) return; // ya está llena
+
+  if (id === acepta) {
+    // CORRECTO
+    zona.classList.add('correcto');
+    var d = DATOS[id];
+    var respDiv = document.getElementById('resp-' + id);
+    respDiv.innerHTML = '<span class="per-emoji">' + d.emoji + '</span><span class="per-nombre">¡' + d.nombre + '! ✓</span>';
+    respDiv.style.display = 'flex';
+    zona.querySelector('.drop-placeholder').style.display = 'none';
+
+    elPersonaje.classList.add('colocado');
+
+    correctos++;
+    puntos += 20;
+    document.getElementById('pts').textContent = puntos;
+    document.getElementById('prog-txt').textContent = correctos + ' / ' + total;
+    document.getElementById('prog-fill').style.width = (correctos / total * 100) + '%';
+
+    fb.textContent = '¡Muy bien! ' + d.nombre + ' va ahí. 🌟';
+    fb.className = 'feedback-barra ok';
+
+    if (correctos === total) {
+      setTimeout(ganar, 700);
+    }
+  } else {
+    // INCORRECTO
+    zona.classList.add('incorrecto');
+    setTimeout(() => zona.classList.remove('incorrecto'), 600);
+    fb.textContent = '¡Ese no es! Piensa bien quién hace eso en la leyenda 🤔';
+    fb.className = 'feedback-barra mal';
+  }
+
+  setTimeout(() => { fb.className = 'feedback-barra'; }, 2800);
+}
+
+function ganar() {
+  var msg = '¡Uniste a todos los personajes de Los Gagones correctamente! ';
+  if (puntos === 100) msg += '¡Puntuación perfecta de 100 puntos! Eres un verdadero conocedor de la leyenda. 🐱🌙';
+  else msg += 'Conseguiste ' + puntos + ' puntos. ¡La leyenda de San Jacinto ya no tiene secretos para ti!';
+  document.getElementById('fin-msg').textContent = msg;
+  document.getElementById('fin').classList.add('show');
+}
+
+function reiniciar() {
+  correctos = 0; puntos = 0;
+  document.getElementById('pts').textContent = '0';
+  document.getElementById('prog-txt').textContent = '0 / ' + total;
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('fin').classList.remove('show');
+  document.getElementById('feedback').className = 'feedback-barra';
+
+  document.querySelectorAll('.personaje').forEach(function(el) {
+    el.classList.remove('colocado', 'arrastrando');
+  });
+  document.querySelectorAll('.zona-drop').forEach(function(z) {
+    z.classList.remove('correcto', 'incorrecto', 'sobre');
+    z.querySelector('.drop-placeholder').style.display = 'flex';
+    var id = z.dataset.acepta;
+    var r = document.getElementById('resp-' + id);
+    r.style.display = 'none';
+    r.innerHTML = '';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Camino de los Ahorcados</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #020408;
+    font-family: 'IM Fell English', serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #pantalla-inicio, #pantalla-fin {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #0a1520 0%, #020408 70%);
+    z-index: 100;
+    text-align: center;
+    padding: 20px;
+  }
+
+  #pantalla-fin { display: none; }
+
+  .titulo-juego {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+    font-weight: 900;
+    color: #7ecfff;
+    text-shadow: 0 0 20px #0088ff, 0 0 50px #004488;
+    margin-bottom: 8px;
+    animation: titilar 3s ease-in-out infinite;
+  }
+
+  @keyframes titilar {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; text-shadow: 0 0 30px #00aaff, 0 0 70px #0066ff; }
+  }
+
+  .subtitulo {
+    color: #5a8a9a;
+    font-style: italic;
+    font-size: clamp(0.85rem, 1.8vw, 1.2rem);
+    margin-bottom: 25px;
+  }
+
+  .historia-texto {
+    color: #aaccd8;
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    border: 1px solid #1a3a4a;
+    padding: 15px 20px;
+    border-radius: 6px;
+    background: rgba(10, 30, 50, 0.5);
+    font-style: italic;
+  }
+
+  .instrucciones {
+    color: #7aa;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 2;
+  }
+
+  .instrucciones span {
+    display: inline-block;
+    background: #0a1a2a;
+    border: 1px solid #2a5a6a;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin: 2px;
+    color: #7ecfff;
+    font-family: monospace;
+  }
+
+  .btn-jugar {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #020408;
+    background: linear-gradient(135deg, #4488bb, #7ecfff);
+    border: none;
+    padding: 12px 35px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(100, 180, 255, 0.4);
+    letter-spacing: 2px;
+  }
+
+  .btn-jugar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 35px rgba(100, 180, 255, 0.7);
+  }
+
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .hud-item {
+    font-family: 'Cinzel', serif;
+    color: #7ecfff;
+    font-size: clamp(0.75rem, 1.8vw, 1rem);
+    text-shadow: 0 0 8px #0088ff;
+    background: rgba(2, 4, 8, 0.8);
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid #1a3a5a;
+  }
+
+  #narrativa {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: #aaccd8;
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+    background: rgba(2, 4, 8, 0.85);
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #1a3a5a;
+    max-width: 70%;
+    display: none;
+  }
+
+  #controles-movil {
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+    display: none;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+  }
+
+  .btn-ctrl {
+    background: rgba(100, 180, 255, 0.15);
+    border: 2px solid #4488bb;
+    color: #7ecfff;
+    font-size: 1.3rem;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .resultado-titulo {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+    font-weight: 900;
+    margin-bottom: 15px;
+  }
+
+  .resultado-titulo.victoria { color: #7ecfff; text-shadow: 0 0 25px #00aaff; }
+  .resultado-titulo.derrota { color: #ff4444; text-shadow: 0 0 25px #ff0000; }
+
+  .resultado-texto {
+    color: #aaccd8;
+    font-style: italic;
+    font-size: 1rem;
+    max-width: 480px;
+    margin-bottom: 25px;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    #controles-movil { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<div id="pantalla-inicio">
+  <div class="titulo-juego">🕯️ El Camino de los Ahorcados 🕯️</div>
+  <div class="subtitulo">— La colina del terror • Loja, Ecuador —</div>
+  <div class="historia-texto">
+    Ana María crecía entre los pasillos del hospital, escapando cada tarde por el sendero solitario que subía la colina. Entre eucaliptos y rocas, las almas de los condenados acechaban en la oscuridad. Guíala hasta la cima para encontrar a Luis Felipe... pero cuida la luz de tu vela.
+  </div>
+  <div class="instrucciones">
+    Mueve: <span>W A S D</span> o <span>↑↓←→</span><br>
+    Recoge 🕯️ velas para iluminar el camino<br>
+    Evita las 👻 sombras de los ahorcados
+  </div>
+  <button class="btn-jugar" onclick="iniciarJuego()">🌙 ADENTRARSE EN LA COLINA 🌙</button>
+</div>
+
+<div id="pantalla-fin">
+  <div class="resultado-titulo" id="resultado-titulo">¡ESCAPASTE!</div>
+  <div class="resultado-texto" id="resultado-texto"></div>
+  <div style="font-size: 2.5rem; margin-bottom: 20px;" id="resultado-emoji">🌙</div>
+  <button class="btn-jugar" onclick="reiniciar()">🔄 VOLVER A LA COLINA</button>
+</div>
+
+<div id="game-container" style="display:none;">
+  <canvas id="gameCanvas"></canvas>
+  <div id="hud">
+    <div class="hud-item">🕯️ Luz: <span id="luz-txt">100</span>%</div>
+    <div class="hud-item">💙 <span id="velas-txt">0</span>/6 velas</div>
+    <div class="hud-item">👻 <span id="nivel-txt">Nivel 1</span></div>
+  </div>
+  <div id="narrativa"></div>
+  <div id="controles-movil">
+    <div style="display:grid; grid-template-columns: repeat(3,55px); grid-template-rows: repeat(2,55px); gap:5px;">
+      <div></div>
+      <button class="btn-ctrl" id="btn-arr">▲</button>
+      <div></div>
+      <button class="btn-ctrl" id="btn-izq">◀</button>
+      <button class="btn-ctrl" id="btn-aba">▼</button>
+      <button class="btn-ctrl" id="btn-der">▶</button>
+    </div>
+    <div style="width:55px;"></div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+let juegoActivo = false;
+let animId;
+
+// Estado
+let jugador, fantasmas, velas, arboles, rocas;
+let luz, velasRecogidas, nivel;
+let teclado = {};
+let touchArr=false,touchAbj=false,touchIzq=false,touchDer=false;
+let narrativaTimer = 0;
+let camX = 0, camY = 0;
+
+const MUNDO_W = 2400;
+const MUNDO_H = 1600;
+const NARRATIVAS = [
+  '"El viento entre los eucaliptos susurraba nombres olvidados..."',
+  '"Ana María sentía que alguien la observaba desde las sombras..."',
+  '"Los ahorcados vagan por este sendero desde hace siglos..."',
+  '"Una vela encendida es lo único que mantiene las sombras a raya..."',
+  '"Luis Felipe... ¿dónde estás entre esta oscuridad?"',
+  '"El hospital quedaba lejos. Solo el camino y la niebla..."',
+];
+let narrativaIdx = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function iniciarJuego() {
+  document.getElementById('pantalla-inicio').style.display = 'none';
+  document.getElementById('pantalla-fin').style.display = 'none';
+  document.getElementById('game-container').style.display = 'block';
+  resize();
+  reiniciarEstado();
+  juegoActivo = true;
+  // Narrativa periódica
+  if (window._narInterval) clearInterval(window._narInterval);
+  window._narInterval = setInterval(() => {
+    if (!juegoActivo) return;
+    mostrarNarrativa(NARRATIVAS[narrativaIdx % NARRATIVAS.length]);
+    narrativaIdx++;
+  }, 8000);
+  loop();
+}
+
+function reiniciarEstado() {
+  luz = 100;
+  velasRecogidas = 0;
+  nivel = 1;
+  narrativaIdx = 0;
+
+  jugador = {
+    x: 200, y: MUNDO_H / 2,
+    w: 20, h: 28,
+    vx: 0, vy: 0,
+    anim: 0, miraDer: true
+  };
+
+  // Meta (cima de la colina)
+  // Velas esparcidas por el mapa
+  velas = [];
+  for (let i = 0; i < 6; i++) {
+    velas.push({
+      x: 300 + Math.random() * (MUNDO_W - 500),
+      y: 100 + Math.random() * (MUNDO_H - 200),
+      recogida: false,
+      anim: Math.random() * Math.PI * 2,
+      parpadeo: Math.random()
+    });
+  }
+
+  // Árboles (eucaliptos)
+  arboles = [];
+  for (let i = 0; i < 60; i++) {
+    arboles.push({
+      x: Math.random() * MUNDO_W,
+      y: Math.random() * MUNDO_H,
+      h: 60 + Math.random() * 80,
+      w: 12 + Math.random() * 10,
+      swayOffset: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Rocas
+  rocas = [];
+  for (let i = 0; i < 30; i++) {
+    rocas.push({
+      x: Math.random() * MUNDO_W,
+      y: Math.random() * MUNDO_H,
+      r: 8 + Math.random() * 20
+    });
+  }
+
+  // Fantasmas
+  fantasmas = [];
+  for (let i = 0; i < 4; i++) {
+    fantasmas.push(crearFantasma());
+  }
+
+  camX = jugador.x - W / 2;
+  camY = jugador.y - H / 2;
+  actualizarHUD();
+}
+
+function crearFantasma() {
+  return {
+    x: MUNDO_W * 0.3 + Math.random() * MUNDO_W * 0.6,
+    y: Math.random() * MUNDO_H,
+    vx: (Math.random() - 0.5) * 1.2,
+    vy: (Math.random() - 0.5) * 1.2,
+    r: 18 + Math.random() * 12,
+    anim: Math.random() * Math.PI * 2,
+    opacidad: 0.3 + Math.random() * 0.5,
+    tipo: Math.random() < 0.5 ? 'flotante' : 'perseguidor'
+  };
+}
+
+function reiniciar() {
+  if (animId) cancelAnimationFrame(animId);
+  clearInterval(window._narInterval);
+  document.getElementById('pantalla-fin').style.display = 'none';
+  iniciarJuego();
+}
+
+function actualizarHUD() {
+  document.getElementById('luz-txt').textContent = Math.round(luz);
+  document.getElementById('velas-txt').textContent = velasRecogidas;
+  document.getElementById('nivel-txt').textContent = `Nivel ${nivel}`;
+}
+
+function mostrarNarrativa(txt) {
+  const el = document.getElementById('narrativa');
+  el.textContent = txt;
+  el.style.display = 'block';
+  clearTimeout(window._narTO);
+  window._narTO = setTimeout(() => el.style.display = 'none', 4000);
+}
+
+// Input
+window.addEventListener('keydown', e => { teclado[e.code] = true; });
+window.addEventListener('keyup', e => { teclado[e.code] = false; });
+
+['btn-arr','btn-aba','btn-izq','btn-der'].forEach(id => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('touchstart', e => { e.preventDefault();
+    if(id==='btn-arr') touchArr=true;
+    if(id==='btn-aba') touchAbj=true;
+    if(id==='btn-izq') touchIzq=true;
+    if(id==='btn-der') touchDer=true;
+  });
+  btn.addEventListener('touchend', e => { e.preventDefault();
+    if(id==='btn-arr') touchArr=false;
+    if(id==='btn-aba') touchAbj=false;
+    if(id==='btn-izq') touchIzq=false;
+    if(id==='btn-der') touchDer=false;
+  });
+});
+
+function update() {
+  if (!juegoActivo) return;
+
+  const vel = 2.5 + velasRecogidas * 0.3;
+  const arr = teclado['ArrowUp'] || teclado['KeyW'] || touchArr;
+  const abj = teclado['ArrowDown'] || teclado['KeyS'] || touchAbj;
+  const izq = teclado['ArrowLeft'] || teclado['KeyA'] || touchIzq;
+  const der = teclado['ArrowRight'] || teclado['KeyD'] || touchDer;
+
+  jugador.vx = 0; jugador.vy = 0;
+  if (arr) jugador.vy = -vel;
+  if (abj) jugador.vy = vel;
+  if (izq) { jugador.vx = -vel; jugador.miraDer = false; }
+  if (der) { jugador.vx = vel; jugador.miraDer = true; }
+
+  // Diagonal normalizada
+  if (jugador.vx !== 0 && jugador.vy !== 0) {
+    jugador.vx *= 0.707;
+    jugador.vy *= 0.707;
+  }
+
+  jugador.x += jugador.vx;
+  jugador.y += jugador.vy;
+
+  // Límites mundo
+  jugador.x = Math.max(10, Math.min(MUNDO_W - 10, jugador.x));
+  jugador.y = Math.max(10, Math.min(MUNDO_H - 10, jugador.y));
+
+  // Colisión árboles
+  for (const a of arboles) {
+    const dx = jugador.x - (a.x + a.w/2);
+    const dy = jugador.y - (a.y + a.h);
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < a.w * 0.8) {
+      jugador.x -= jugador.vx;
+      jugador.y -= jugador.vy;
+    }
+  }
+
+  // Animación
+  jugador.anim += 0.15;
+
+  // Cámara suave
+  camX += (jugador.x - W/2 - camX) * 0.1;
+  camY += (jugador.y - H/2 - camY) * 0.1;
+  camX = Math.max(0, Math.min(MUNDO_W - W, camX));
+  camY = Math.max(0, Math.min(MUNDO_H - H, camY));
+
+  // Luz decrece
+  const decrece = 0.015 + (fantasmas.filter(f => distancia(jugador, f) < 150).length * 0.02);
+  luz -= decrece;
+  luz = Math.max(0, Math.min(100, luz));
+  actualizarHUD();
+
+  if (luz <= 0) terminarJuego(false, 'luz');
+
+  // Velas
+  for (const v of velas) {
+    v.anim += 0.03;
+    v.parpadeo = 0.7 + Math.sin(Date.now()/300 + v.anim) * 0.3;
+    if (!v.recogida) {
+      const d = distancia(jugador, v);
+      if (d < 25) {
+        v.recogida = true;
+        velasRecogidas++;
+        luz = Math.min(100, luz + 25);
+        actualizarHUD();
+        mostrarNarrativa('✨ ¡Vela recogida! La luz te protege...');
+        // Nueva narrativa + más fantasmas en nivel siguiente
+        if (velasRecogidas >= 6) {
+          terminarJuego(true);
+          return;
+        }
+        if (velasRecogidas === 3) {
+          nivel = 2;
+          fantasmas.push(crearFantasma());
+          fantasmas.push(crearFantasma());
+          mostrarNarrativa('⚠️ Las sombras se despiertan con furia...');
+        }
+      }
+    }
+  }
+
+  // Fantasmas
+  for (const f of fantasmas) {
+    f.anim += 0.05;
+
+    if (f.tipo === 'perseguidor' && distancia(jugador, f) < 300) {
+      const dx = jugador.x - f.x;
+      const dy = jugador.y - f.y;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      f.vx += (dx/d) * 0.06 * nivel;
+      f.vy += (dy/d) * 0.06 * nivel;
+    } else {
+      f.vx += (Math.random()-0.5) * 0.15;
+      f.vy += (Math.random()-0.5) * 0.15;
+    }
+
+    // Límite de velocidad
+    const spd = Math.sqrt(f.vx*f.vx + f.vy*f.vy);
+    if (spd > 1.5 * nivel) { f.vx = f.vx/spd * 1.5 * nivel; f.vy = f.vy/spd * 1.5 * nivel; }
+
+    f.x += f.vx; f.y += f.vy;
+
+    // Rebotar en bordes
+    if (f.x < 0 || f.x > MUNDO_W) f.vx *= -1;
+    if (f.y < 0 || f.y > MUNDO_H) f.vy *= -1;
+
+    // Colisión
+    const d = distancia(jugador, f);
+    if (d < f.r + 12) {
+      luz -= 15;
+      f.x = MUNDO_W * 0.3 + Math.random() * MUNDO_W * 0.6;
+      f.y = Math.random() * MUNDO_H;
+      f.vx = (Math.random()-0.5) * 1.5;
+      f.vy = (Math.random()-0.5) * 1.5;
+      mostrarNarrativa('💀 ¡Una sombra te tocó! La luz mengua...');
+    }
+  }
+}
+
+function distancia(a, b) {
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+
+function draw() {
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  // Fondo (tierra de noche)
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, MUNDO_H);
+  bgGrad.addColorStop(0, '#050810');
+  bgGrad.addColorStop(0.5, '#030608');
+  bgGrad.addColorStop(1, '#020305');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, MUNDO_W, MUNDO_H);
+
+  // Textura de tierra (puntos)
+  ctx.fillStyle = 'rgba(20,30,15,0.5)';
+  for (let i = 0; i < 200; i++) {
+    const tx = (i * 337) % MUNDO_W;
+    const ty = (i * 193) % MUNDO_H;
+    ctx.fillRect(tx, ty, 2, 2);
+  }
+
+  // Niebla de fondo (patches)
+  const t = Date.now() / 5000;
+  for (let i = 0; i < 8; i++) {
+    const fx = (Math.sin(t + i * 0.8) * 0.5 + 0.5) * MUNDO_W;
+    const fy = (Math.cos(t + i * 0.6) * 0.5 + 0.5) * MUNDO_H;
+    const fog = ctx.createRadialGradient(fx, fy, 0, fx, fy, 200);
+    fog.addColorStop(0, 'rgba(30,50,60,0.12)');
+    fog.addColorStop(1, 'transparent');
+    ctx.fillStyle = fog;
+    ctx.fillRect(0, 0, MUNDO_W, MUNDO_H);
+  }
+
+  // Rocas
+  for (const r of rocas) {
+    ctx.fillStyle = '#1a1f1a';
+    ctx.beginPath();
+    ctx.ellipse(r.x, r.y, r.r, r.r * 0.65, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a302a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Árboles (eucaliptos siniestros)
+  const swayT = Date.now() / 2000;
+  for (const a of arboles) {
+    const sway = Math.sin(swayT + a.swayOffset) * 3;
+    drawArbol(a.x, a.y, a.w, a.h, sway);
+  }
+
+  // Velas
+  for (const v of velas) {
+    if (v.recogida) continue;
+    drawVela(v.x, v.y, v.anim, v.parpadeo);
+  }
+
+  // Fantasmas
+  for (const f of fantasmas) {
+    drawFantasma(f.x, f.y, f.r, f.anim, f.opacidad);
+  }
+
+  // META (cima) - siempre visible
+  drawMeta(MUNDO_W - 150, MUNDO_H / 2);
+
+  // Jugador
+  drawJugador(jugador.x, jugador.y, jugador.miraDer, jugador.anim);
+
+  // Halo de luz alrededor del jugador
+  const radioLuz = 80 + (luz / 100) * 120;
+  const halo = ctx.createRadialGradient(jugador.x, jugador.y, 0, jugador.x, jugador.y, radioLuz);
+  halo.addColorStop(0, 'rgba(255,220,100,0)');
+  halo.addColorStop(0.5, 'rgba(255,180,50,0.03)');
+  halo.addColorStop(1, 'transparent');
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, MUNDO_W, MUNDO_H);
+
+  ctx.restore();
+
+  // Oscuridad global (sobre todo)
+  drawOscuridad();
+
+  // Interfaz de luz (barra)
+  drawBarraLuz();
+}
+
+function drawOscuridad() {
+  // La oscuridad cubre la pantalla excepto alrededor del jugador
+  const screenX = jugador.x - camX;
+  const screenY = jugador.y - camY;
+  const radioVision = (60 + (luz / 100) * 180);
+
+  const dark = ctx.createRadialGradient(screenX, screenY, radioVision * 0.3, screenX, screenY, radioVision);
+  dark.addColorStop(0, 'rgba(2,4,8,0)');
+  dark.addColorStop(0.7, 'rgba(2,4,8,0.85)');
+  dark.addColorStop(1, 'rgba(2,4,8,0.97)');
+
+  ctx.fillStyle = dark;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawBarraLuz() {
+  const bw = Math.min(200, W * 0.25);
+  const bx = W/2 - bw/2;
+  const by = H - 25;
+  ctx.fillStyle = 'rgba(2,4,8,0.7)';
+  ctx.fillRect(bx - 2, by - 2, bw + 4, 14);
+  const col = luz > 50 ? '#7ecfff' : luz > 25 ? '#ffaa00' : '#ff3333';
+  ctx.fillStyle = col;
+  ctx.fillRect(bx, by, bw * (luz/100), 10);
+}
+
+function drawArbol(x, y, w, h, sway) {
+  // Tronco
+  ctx.fillStyle = '#1a1208';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + sway, y - h * 0.4);
+  ctx.lineTo(x + w * 0.6 + sway, y - h * 0.4);
+  ctx.lineTo(x + w, y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Copa (siniestra)
+  ctx.fillStyle = '#0d1a0d';
+  for (let i = 0; i < 3; i++) {
+    const layerY = y - h * 0.35 - i * h * 0.22;
+    const layerW = (w * 2.5) * (1 - i * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(x + w/2 + sway - layerW/2, layerY);
+    ctx.lineTo(x + w/2 + sway, layerY - h * 0.25);
+    ctx.lineTo(x + w/2 + sway + layerW/2, layerY);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Ramas colgantes
+  ctx.strokeStyle = '#0a1008';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    const bx = x + w/2 + sway + (Math.random()-0.5)*w;
+    const by2 = y - h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(bx, by2);
+    ctx.quadraticCurveTo(bx + sway * 2, by2 + 20, bx + sway * 1.5, by2 + 40);
+    ctx.stroke();
+  }
+}
+
+function drawVela(x, y, anim, parpadeo) {
+  const t = Date.now() / 200;
+  const flicker = 0.8 + Math.sin(t * 3 + anim) * 0.2;
+
+  // Luz suave alrededor
+  const glow = ctx.createRadialGradient(x, y - 20, 0, x, y - 20, 50 * parpadeo);
+  glow.addColorStop(0, `rgba(255,200,80,${0.4 * parpadeo})`);
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y - 20, 50, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Vela
+  ctx.fillStyle = '#e8e0c8';
+  ctx.fillRect(x - 4, y - 25, 8, 20);
+
+  // Llama
+  ctx.fillStyle = `rgba(255,180,30,${flicker})`;
+  ctx.beginPath();
+  ctx.ellipse(x, y - 30, 4, 8 * flicker, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = `rgba(255,240,100,${flicker})`;
+  ctx.beginPath();
+  ctx.ellipse(x, y - 32, 2, 4 * flicker, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Texto
+  ctx.fillStyle = `rgba(255,215,0,${0.5 + Math.sin(anim)*0.3})`;
+  ctx.font = '12px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🕯️', x, y - 38);
+}
+
+function drawFantasma(x, y, r, anim, op) {
+  const t = Date.now() / 1000;
+  const bob = Math.sin(t + anim) * 6;
+
+  ctx.save();
+  ctx.globalAlpha = op * (0.5 + Math.sin(t * 2 + anim) * 0.3);
+
+  // Halo
+  const glow = ctx.createRadialGradient(x, y + bob, 0, x, y + bob, r * 2);
+  glow.addColorStop(0, 'rgba(150,200,255,0.3)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y + bob, r * 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cuerpo fantasma
+  ctx.fillStyle = 'rgba(180,220,255,0.6)';
+  ctx.beginPath();
+  ctx.arc(x, y + bob - r * 0.3, r, Math.PI, 0);
+  ctx.lineTo(x + r, y + bob + r * 0.8);
+  // Faldón ondulado
+  const segs = 5;
+  for (let i = segs; i >= 0; i--) {
+    const px = x + r - (i / segs) * r * 2;
+    const wave = Math.sin(t * 3 + i + anim) * 5;
+    ctx.lineTo(px, y + bob + r * 0.8 + (i % 2 === 0 ? 8 : 0) + wave);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // Ojos
+  ctx.fillStyle = 'rgba(0,20,60,0.9)';
+  ctx.beginPath();
+  ctx.ellipse(x - r*0.3, y + bob - r*0.25, 3, 4, 0, 0, Math.PI*2);
+  ctx.ellipse(x + r*0.3, y + bob - r*0.25, 3, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Boca (grito)
+  ctx.strokeStyle = 'rgba(0,20,60,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y + bob + r*0.1, 4, 0, Math.PI);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawJugador(x, y, miraDer, anim) {
+  ctx.save();
+  if (!miraDer) {
+    ctx.translate(x, y);
+    ctx.scale(-1, 1);
+    ctx.translate(-x, -y);
+  }
+
+  const t = anim;
+  const legSwing = Math.sin(t) * 5;
+
+  // Sombra
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 16, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Vestido/cuerpo (Ana María - enfermera)
+  ctx.fillStyle = '#d8c8b8';
+  ctx.beginPath();
+  ctx.moveTo(x - 8, y - 5);
+  ctx.lineTo(x + 8, y - 5);
+  ctx.lineTo(x + 10, y + 14);
+  ctx.lineTo(x - 10, y + 14);
+  ctx.closePath();
+  ctx.fill();
+
+  // Cruz roja (enfermera)
+  ctx.fillStyle = '#cc2222';
+  ctx.fillRect(x - 1, y - 3, 3, 8);
+  ctx.fillRect(x - 4, y + 1, 9, 3);
+
+  // Cabeza
+  ctx.fillStyle = '#d4a882';
+  ctx.beginPath();
+  ctx.arc(x, y - 12, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cofia blanca
+  ctx.fillStyle = '#f0f0f0';
+  ctx.beginPath();
+  ctx.arc(x, y - 14, 7, Math.PI, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // Ojos
+  ctx.fillStyle = '#333';
+  ctx.fillRect(x - 3, y - 13, 2, 2);
+  ctx.fillRect(x + 1, y - 13, 2, 2);
+
+  // Piernas (animación)
+  ctx.fillStyle = '#c8a890';
+  ctx.fillRect(x - 6, y + 14, 5, 10 + legSwing);
+  ctx.fillRect(x + 1, y + 14, 5, 10 - legSwing);
+
+  // Vela en mano
+  ctx.fillStyle = '#e8e0c8';
+  ctx.fillRect(x + 9, y - 8, 4, 12);
+  ctx.fillStyle = '#ffaa00';
+  ctx.beginPath();
+  ctx.ellipse(x + 11, y - 11, 2, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawMeta(x, y) {
+  const t = Date.now() / 1000;
+  // Figura de Luis Felipe
+  ctx.fillStyle = `rgba(100,160,220,${0.5 + Math.sin(t)*0.3})`;
+  ctx.beginPath();
+  ctx.arc(x, y - 20, 15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(x - 12, y - 5, 24, 30);
+
+  ctx.fillStyle = '#7ecfff';
+  ctx.font = 'bold 12px Cinzel, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Luis Felipe', x, y + 45);
+  ctx.fillText('🎯 ¡LLEGA AQUÍ!', x, y + 60);
+
+  // Aura
+  const aura = ctx.createRadialGradient(x, y, 0, x, y, 60 + Math.sin(t*2)*10);
+  aura.addColorStop(0, 'rgba(100,180,255,0.15)');
+  aura.addColorStop(1, 'transparent');
+  ctx.fillStyle = aura;
+  ctx.beginPath();
+  ctx.arc(x, y, 70, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Comprobar si llegó
+  const d = distancia(jugador, {x, y});
+  if (d < 50 && juegoActivo) terminarJuego(true);
+}
+
+function terminarJuego(ganaste, razon) {
+  juegoActivo = false;
+  clearInterval(window._narInterval);
+  cancelAnimationFrame(animId);
+  document.getElementById('game-container').style.display = 'none';
+  document.getElementById('pantalla-fin').style.display = 'flex';
+
+  const titulo = document.getElementById('resultado-titulo');
+  const texto = document.getElementById('resultado-texto');
+  const emoji = document.getElementById('resultado-emoji');
+
+  if (ganaste) {
+    titulo.className = 'resultado-titulo victoria';
+    titulo.textContent = '💙 ¡ENCONTRASTE A LUIS FELIPE! 💙';
+    texto.textContent = `Ana María llegó a la cima de la colina. Entre eucaliptos y la niebla de la noche, sus miradas se entrelazaron en silencio. "Fue un flechazo: sus miradas se entrelazaron en silencio, y pronto su amor floreció puro y casto..." — Recogiste ${velasRecogidas} velas en el camino.`;
+    emoji.textContent = '🌙💙🕯️';
+  } else {
+    titulo.className = 'resultado-titulo derrota';
+    titulo.textContent = '👻 LAS SOMBRAS TE CONSUMIERON';
+    texto.textContent = '"Las almas de los ahorcados vagan por este sendero desde hace siglos..." La oscuridad te envolvió antes de llegar a la cima. La llama de tu vela se apagó y el camino quedó en tinieblas. ¡Recoge más velas la próxima vez!';
+    emoji.textContent = '🌑💀🌫️';
+  }
+}
+
+function loop() {
+  update();
+  draw();
+  animId = requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>
